@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package parser;
+
+//所有的设备都要实现解析器的这两个功能
+service Parser {
+    // 下行解析器：序列化要下发的应用层数据
+    rpc Marshal(DownReq) returns (DownRsp) {}
+
+    //上行解析器：反序列化上行的数据为应用层数据
+    rpc UnMarshal(UpReq) returns (UpRsp) {}
+}
+
+//客户端发送给服务端
+message DownReq {
+    string  ID  = 1;
+    string name = 2;
+    bytes payload=3;
+    string retain = 4;
+}
+
+//服务端返回给客户端
+message DownRsp {
+    string  ID  = 1;
+    string name = 2;
+    bytes payload=3;
+    string err = 4;
+}
+
+//客户端发送给服务端
+message UpReq {
+    string  ID  = 1;
+    string name = 2;
+    bytes payload=3;
+    string retain = 4;
+}
+
+//服务端返回给客户端
+message UpRsp {
+    string ID  = 1;
+    string name = 2;
+    bytes payload=3;
+    string err = 4;
+}
