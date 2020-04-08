@@ -19,20 +19,24 @@ enum Operation {
 //message是固定的。UserInfo是类名，可以随意指定，符合规范即可
 message UplinkFrame{
     int32 FrameType = 1;   //消息
-    bytes DevAddr = 2;    //消息大小
-    uint32 FrameNum = 3;      //消息计数
-    uint32 Port = 4;      //消息计数
-    bytes PhyPayload = 5;
-    uint32 UplinkId=6;
+    string DevName = 2;     // 这个设备类型可以不传递给终端
+    string DevId = 3;       //这个设备id可以不传递给终端
+    uint32 FrameNum = 4;      //消息计数
+    uint32 Port = 5;      //端口
+    bytes PhyPayload = 6;
+    uint32 UplinkId=7;
+
 }
 
 message DownlinkFrame{
     int32 FrameType = 1;   //消息
-    bytes DevAddr = 2;    //消息大小
-    uint32 FrameNum = 3;      //消息计数
-    uint32 Port = 4;      //消息计数
-    bytes PhyPayload=5;
-    uint32 DownlinkId=6;
+    string DevName = 2; // 这个设备类型可以不传递给终端
+    string DevId = 3;  //这个设备id可以不传递给终端
+    uint32 FrameNum = 4;      //消息计数
+    uint32 Port = 5;
+    bytes PhyPayload=6;
+    uint32 DownlinkId=7;
+
 }
 
 message Payload{

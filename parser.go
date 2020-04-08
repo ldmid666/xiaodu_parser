@@ -27,15 +27,7 @@ const (
 	TYPE_CONFIG = "config"
 	CONFIG_VOLUME = "VOLUME"
 )
-/**
-复制的 .pd.go文件的
-type HelloserverClient interface {
-   //一个打招呼的函数
-   Sayhello(ctx context.Context, in *HelloReq, opts ...grpc.CallOption) (*HelloRsp, error)
-   //一个说名字的服务
-   Sayname(ctx context.Context, in *NameReq, opts ...grpc.CallOption) (*NameRsq, error)
-}
-*/
+
 type server struct{}
 
 //rpc
