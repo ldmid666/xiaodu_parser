@@ -2,18 +2,16 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"log"
 	"net"
 	"strconv"
-	pb "xiaodu_parser/grpc_proto"
 	devProto "xiaodu_parser/dev_proto"
-	"google.golang.org/grpc"
-	"github.com/golang/protobuf/proto"
-
+	pb "xiaodu_parser/grpc_proto"
 )
 const (
 	Category_CMD    uint32 = 0
@@ -45,16 +43,11 @@ func (this *server) Marshal(ctx context.Context, in *pb.DownReq) (out *pb.DownRs
 	}
 
 	//应用层下发的指令可能有多种组合
-	req := make(map[string]interface{})
-	err = json.Unmarshal(in.Payload,&req)
-	if err != nil {
-		log.Println("[Marshal]req error",in.Name,string(in.Payload),err)
-		err =  errors.Wrap(err,"[Marshal]Unmarshal error")
-		return nil,err
-	}
+
 	downMsg := &devProto.Payload{}
-	kind := mustString(req["kind"])
-	filed := mustString(req["field"])
+	kind := in.Kind
+	filed := in.Field
+	val := in.Val
 	if kind == TYPE_CMD{
 		downMsg.Kind = uint32(devProto.Category_CMD)
 		switch filed {
@@ -63,7 +56,7 @@ func (this *server) Marshal(ctx context.Context, in *pb.DownReq) (out *pb.DownRs
 			// 应该交给解析器完成。既不要交给上层应用，因为他们没必要了解终端逻辑和数据类型。也不要交给终端完成这些，因为能在解
 			// 析器完成，就尽量不要在终端。因为涉及日后更新，bug修复等，终端改改起来成本都很高。
 			downMsg.Key = uint32(devProto.Device_LAMP)
-			if mustString(req["val"]) == CMD_ON{
+			if mustString(val) == CMD_ON{
 				downMsg.Val = []byte{uint8(devProto.Operation_ON)}
 			}else {
 				downMsg.Val=[]byte{uint8(devProto.Operation_OFF)}
@@ -111,19 +104,18 @@ func (this *server) UnMarshal(ctx context.Context, in *pb.UpReq) (out *pb.UpRsp,
 		log.Println("[controlHandle] proto Unmarshal error",err)
 		return  nil ,err
 	}
-	resp := make(map[string]interface{})
-	resp["kind"] = TYPE_CMD
-	resp["field"] = CMD_LAMP
-	if 	upPayload.Val[0] == byte(devProto.Operation_ON){
-		resp["val"] = "on"
-	}else {
-		resp["val"] = "off"
-	}
-	data ,err := json.Marshal(resp)
 	out = &pb.UpRsp{}
 	out.ID = in.ID
 	out.Name = in.Name
-	out.Payload = data
+	out.Kind = TYPE_CMD
+	out.Field = CMD_LAMP
+
+	if 	upPayload.Val[0] == byte(devProto.Operation_ON){
+		out.Val = "on"
+	}else {
+		out.Val = "off"
+	}
+
 	return out, nil
 }
 
