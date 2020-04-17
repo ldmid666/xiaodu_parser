@@ -15,7 +15,6 @@ func CreateMarshalDown(downMsg  *devProto.Payload) ([]byte,error) {
 	pData, err := proto.Marshal(downMsg)
 	if err != nil {
 		log.Println("[CreateMarshalDown]proto Marshal error",err)
-		//panic(err)
 		e := errors.Wrap(err,"[CreateMarshalDown]proto marshal error")
 		return nil, e
 	}
@@ -23,7 +22,6 @@ func CreateMarshalDown(downMsg  *devProto.Payload) ([]byte,error) {
 	aes_data,err :=encrypt(pData)
 	if err != nil {
 		log.Println("[CreateMarshalDown]Encrypt error",err)
-		//panic(err)
 		e := errors.Wrap(err,"[CreateMarshalDown]encrypt data error")
 		return nil, e
 	}
@@ -32,7 +30,6 @@ func CreateMarshalDown(downMsg  *devProto.Payload) ([]byte,error) {
 
 
 var key = []byte("B31F2A75FBF94099")
-
 var iv = []byte("1234567890123456")
 
 func encrypt(origData []byte) ([]byte, error) {
@@ -42,21 +39,15 @@ func encrypt(origData []byte) ([]byte, error) {
 	}
 	blockSize := block.BlockSize()
 	origData = PKCS5Padding(origData, blockSize)
-	// origData = ZeroPadding(origData, block.BlockSize())
 	blockMode := cipher.NewCBCEncrypter(block, iv)
 	crypted := make([]byte, len(origData))
 
 	blockMode.CryptBlocks(crypted, origData)
 	return crypted, nil
-	//return base64.StdEncoding.EncodeToString(crypted), nil
 }
 // 注意这里传入的是个base64加密的
 func decrypt(crypted []byte) ([]byte, error) {
-	//decodeData,err:=base64.StdEncoding.DecodeString(crypted)
 	decodeData := crypted
-	//if err != nil {
-	//	return "",err
-	//}
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -66,7 +57,6 @@ func decrypt(crypted []byte) ([]byte, error) {
 	origData := make([]byte, len(decodeData))
 	blockMode.CryptBlocks(origData, decodeData)
 	origData = PKCS5UnPadding(origData)
-	// origData = ZeroUnPadding(origData)
 	return origData, nil
 }
 

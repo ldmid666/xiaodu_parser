@@ -56,10 +56,8 @@ func registerServer() {
 	}
 
 	go func() {
-		//log.Println("checkid")
 		checkid := "service:" + DRIVER_NAME
 		for range time.Tick(ttl) {
-			//log.Println("checkid")
 			err := client.Agent().PassTTL(checkid, "")
 			if err != nil {
 				log.Fatalln(err)

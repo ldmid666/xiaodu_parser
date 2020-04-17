@@ -6,7 +6,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/health/grpc_health_v1"
 	"log"
 	"net"
 	"strconv"
@@ -28,22 +27,13 @@ const (
 
 type server struct{}
 
-//rpc
-//函数关键字（对象）函数名（客户端发送过来的内容 ， 返回给客户端的内容） 错误返回值
-
-//grpc
-//函数关键字 （对象）函数名 （cotext，客户端发过来的参数 ）（发送给客户端的参数，错误）
-
-//进行改下,绑定到你自己的结构体,参数带上包名
 func (this *server) Marshal(ctx context.Context, in *pb.DownReq) (out *pb.DownRsp, err error) {
 	log.Println("[Marshal]", in.Name)
 	if ctx.Err() == context.Canceled {
 		log.Println("timeout")
 		return nil,errors.New ("[Marshal]timeout")
 	}
-
 	//应用层下发的指令可能有多种组合
-
 	downMsg := &devProto.Payload{}
 	kind := in.Kind
 	filed := in.Field
@@ -74,15 +64,21 @@ func (this *server) Marshal(ctx context.Context, in *pb.DownReq) (out *pb.DownRs
 
 			return  out,nil
 		default:
+			log.Println("[Marshal]filed=", filed)
 			return nil,errors.New ("[Marshal]cmd filed error")
 		}
+
 	}else if kind == TYPE_CONFIG {
 			//TODO:配置参数的修改
+		log.Println("not support config", kind)
+
 	}else{
+
+		log.Println("kind error.", kind)
 		return nil,errors.New ("[Marshal]kind error")
 	}
-
-	err = errors.New("Unknown error type")
+	log.Println("Unknown error ")
+	err = errors.New("Unknown error")
 	return nil,err
 }
 
@@ -115,24 +111,7 @@ func (this *server) UnMarshal(ctx context.Context, in *pb.UpReq) (out *pb.UpRsp,
 	}else {
 		out.Val = "off"
 	}
-
 	return out, nil
-}
-
-
-//health
-type HealthImpl struct{}
-
-// Check 实现健康检查接口，这里直接返回健康状态，这里也可以有更复杂的健康检查策略，比如根据服务器负载来返回
-func (h *HealthImpl) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
-	fmt.Print("health checking\n")
-	return &grpc_health_v1.HealthCheckResponse{
-		Status: grpc_health_v1.HealthCheckResponse_SERVING,
-	}, nil
-}
-
-func (h *HealthImpl) Watch(req *grpc_health_v1.HealthCheckRequest, w grpc_health_v1.Health_WatchServer) error {
-	return nil
 }
 
 func CreateNewParser() error{
@@ -147,10 +126,7 @@ func CreateNewParser() error{
 	//创建grpc的服务
 	srv := grpc.NewServer()
 	//注册服务
-	//pd就是protobuf那边的包,Register后面跟服务名
 	pb.RegisterParserServer(srv, &server{})
-	grpc_health_v1.RegisterHealthServer(srv, &HealthImpl{})
-
 	//等待网络连接
 	err = srv.Serve(ln)
 	if err != nil {
@@ -158,7 +134,7 @@ func CreateNewParser() error{
 		log.Println("网络错误: ", err)
 		return errors.Wrap(err,"connect error")
 	}
-	// TODO:如果服务建立出现问题，应该讲注册的服务主动停掉
+	// TODO:如果服务建立出现问题，应该将注册的服务主动停掉
 	return nil
 }
 
