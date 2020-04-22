@@ -1,6 +1,7 @@
 ### 使用说明
 
-使用说明参考工程[iot_gateway_v1]()
+使用说明参考工程[iot_gateway](https://github.com/ldmid666/iot_gateway)
+
 
 ### 其他说明
 
