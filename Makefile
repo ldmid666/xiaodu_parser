@@ -1,5 +1,5 @@
 VERSION = v0.0.2
-PROJECT_NAME := parser_xiaodu
+PROJECT_NAME := parser_===xiaodu
 OUTPUT_DIR := $(CURDIR)
 BUILDTIME = $(shell date "+%Y%m%d")
 LDFLAGS = -mod=vendor -ldflags "-w -s -X 'main.Version=${VERSION}' -X 'main.Build=${BUILDTIME}'"
